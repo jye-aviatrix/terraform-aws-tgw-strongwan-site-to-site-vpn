@@ -18,9 +18,9 @@ variable "vpcs_region1" {
 
 variable "vpcs_region2" {
   default = {
-    ue1shared = "10.200.1.0/24"
-    ue1prod = "10.200.2.0/24"
-    ue1dev = "10.200.3.0/24"
+    ue2shared = "10.200.1.0/24"
+    ue2prod = "10.200.2.0/24"
+    ue2dev = "10.200.3.0/24"
   }
 }
 

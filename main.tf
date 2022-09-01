@@ -13,6 +13,23 @@ module "region1_vpc" {
   propagate_public_route_tables_vgw = false
 }
 
+module "region2_vpc" {
+  source = "./modules/aws_vpc"
+
+  for_each = var.vpcs_region2
+  name = each.key
+  cidr = each.value
+
+  azs                = slice(data.aws_availability_zones.available_region2.names, 0, 2) # Select first two aws availability zones
+  public_subnets     = slice(cidrsubnets(each.value, 2, 2, 2, 2), 0, 2) # Caculate consecuitive CIDR range for public subnets
+  private_subnets    = slice(cidrsubnets(each.value, 2, 2, 2, 2), 2, 4) # Caculate consecuitive CIDR range for private subnets
+  enable_vpn_gateway = false
+  propagate_private_route_tables_vgw = false
+  propagate_public_route_tables_vgw = false
+  providers = {
+    aws = aws.secondary
+   }
+}
 
 # module "cloudvpc" {
 #   source = "./modules/aws_vpc"
