@@ -31,35 +31,60 @@ module "cloud_vpc_region2" {
    }
 }
 
-# module "cloudvpc" {
-#   source = "./modules/aws_vpc"
 
-#   name = var.cloud_vpc_name
-#   cidr = var.cloud_vpc_cidr
+module "onprem_vpc_region1" {
+  source = "./modules/aws_vpc"
 
-#   azs                = slice(data.aws_availability_zones.available.names, 0, 2) # Select first two aws availability zones
-#   public_subnets     = slice(cidrsubnets(var.cloud_vpc_cidr, 2, 2, 2, 2), 0, 2) # Caculate consecuitive CIDR range for public subnets
-#   private_subnets    = slice(cidrsubnets(var.cloud_vpc_cidr, 2, 2, 2, 2), 2, 4) # Caculate consecuitive CIDR range for private subnets
-#   enable_vpn_gateway = true
-#   propagate_private_route_tables_vgw = true
-#   propagate_public_route_tables_vgw = true
-# }
+  for_each = var.onprem_vpcs_region1
+  name = each.key
+  cidr = each.value
+
+  azs                = slice(data.aws_availability_zones.available.names, 0, 2) # Select first two aws availability zones
+  public_subnets     = slice(cidrsubnets(each.value, 2, 2, 2, 2), 0, 2) # Caculate consecuitive CIDR range for public subnets
+  private_subnets    = slice(cidrsubnets(each.value, 2, 2, 2, 2), 2, 4) # Caculate consecuitive CIDR range for private subnets
+  enable_vpn_gateway = false
+  propagate_private_route_tables_vgw = false
+  propagate_public_route_tables_vgw = false
+}
+
+module "onprem_vpc_region2" {
+  source = "./modules/aws_vpc"
+
+  for_each = var.onprem_vpcs_region2
+  name = each.key
+  cidr = each.value
+
+  azs                = slice(data.aws_availability_zones.available_region2.names, 0, 2) # Select first two aws availability zones
+  public_subnets     = slice(cidrsubnets(each.value, 2, 2, 2, 2), 0, 2) # Caculate consecuitive CIDR range for public subnets
+  private_subnets    = slice(cidrsubnets(each.value, 2, 2, 2, 2), 2, 4) # Caculate consecuitive CIDR range for private subnets
+  enable_vpn_gateway = false
+  propagate_private_route_tables_vgw = false
+  propagate_public_route_tables_vgw = false
+  providers = {
+    aws = aws.secondary
+   }
+}
 
 
 
-# module "onpremvpc" {
-#   source = "./modules/aws_vpc"
+resource "aws_ec2_transit_gateway" "tgw_region1" {
+  for_each = var.tgw_region1
+  description = each.value
+  tags = {
+    "Name" = each.key
+  }
+}
 
-#   name = var.onprem_vpc_name
-#   cidr = var.onprem_vpc_cidr
 
-#   azs                = slice(data.aws_availability_zones.available.names, 0, 2) # Select first two aws availability zones
-#   public_subnets     = slice(cidrsubnets(var.onprem_vpc_cidr, 2, 2, 2, 2), 0, 2) # Caculate consecuitive CIDR range for public subnets
-#   private_subnets    = slice(cidrsubnets(var.onprem_vpc_cidr, 2, 2, 2, 2), 2, 4) # Caculate consecuitive CIDR range for private subnets
-#   enable_vpn_gateway = false
-  
+resource "aws_ec2_transit_gateway" "tgw_region2" {
+  for_each = var.tgw_region2
+  description = each.value
+  tags = {
+    "Name" = each.key
+  }
+  provider = aws.secondary
+}
 
-# }
 
 # # Create EIP for OnPrem VPN Gateway
 # resource "aws_eip" "onpremvpngw" {

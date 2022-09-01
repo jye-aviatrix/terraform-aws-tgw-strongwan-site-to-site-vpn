@@ -24,6 +24,30 @@ variable "cloud_vpcs_region2" {
   }
 }
 
+variable "onprem_vpcs_region1" {
+  default = {
+    ue1onprem = "10.10.1.0/24"
+  }
+}
+
+variable "onprem_vpcs_region2" {
+  default = {
+    ue2onprem = "10.20.1.0/24"
+  }
+}
+
+variable "tgw_region1" {
+  default = {
+    ue1tgw = "ue1tgw"
+  }
+}
+
+variable "tgw_region2" {
+  default = {
+    ue2tgw = "ue2tgw"
+  }
+}
+
 # variable "cloud_vpc_name" {
 #   default = "cloud_vpc"
 #   description = "Specify cloud side VPC name"
