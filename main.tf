@@ -84,6 +84,17 @@ resource "aws_ec2_transit_gateway" "tgw_region2" {
 }
 
 
+# Attach region1 VPCs to region1 tgw
+resource "aws_ec2_transit_gateway_vpc_attachment" "region1" {
+  for_each = var.cloud_vpcs_region1
+  subnet_ids         = module.cloud_vpc_region1[each.key].public_subnets
+  transit_gateway_id = aws_ec2_transit_gateway.tgw_region1.id
+  vpc_id             = module.cloud_vpc_region1[each.key].vpc_id
+  tags = {
+    "Name" = each.key
+  }
+}
+
 # Create EIP for OnPrem VPN Gateway
 resource "aws_eip" "onpregw_region1" {
   vpc = true
