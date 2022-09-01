@@ -95,6 +95,19 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "region1" {
   }
 }
 
+# Add 10/8 route to region1 VPC route tables
+resource "aws_route" "region1" {
+  for_each = toset(flatten([for k,v in var.cloud_vpcs_region1 : concat(module.cloud_vpc_region1[k].public_route_table_ids,module.cloud_vpc_region1[k].private_route_table_ids)]))
+
+  route_table_id         = each.key
+  destination_cidr_block = "10.0.0.0/8"
+  transit_gateway_id             = aws_ec2_transit_gateway.tgw_region1.id
+
+  timeouts {
+    create = "5m"
+  }
+}
+
 # Create EIP for OnPrem VPN Gateway
 resource "aws_eip" "onpregw_region1" {
   vpc = true
@@ -191,16 +204,17 @@ resource "aws_cloudformation_stack" "region_1vpn_gateway" {
   template_body = file("${path.module}/vpn-gateway-strongswan.yml")
 }
 
-# # Add Test instances
-# module "cloud_test_ec2" {
-#   source  = "jye-aviatrix/aws-linux-vm-public/aws"
-#   version = "1.0.3"
-#   key_name = var.key_name
-#   region = var.region
-#   subnet_id = module.cloudvpc.public_subnets[0]
-#   vm_name = "cloud-test-ec2"
-#   vpc_id = module.cloudvpc.vpc_id
-# }
+# Add Test instances
+module "region1_test_ec2" {
+  for_each = var.cloud_vpcs_region1
+  source  = "jye-aviatrix/aws-linux-vm-public/aws"
+  version = "2.0.0"
+  key_name = var.key_name
+  subnet_id = module.cloud_vpc_region1[each.key].public_subnets[0]
+  vm_name = each.key
+  vpc_id = module.cloud_vpc_region1[each.key].vpc_id
+}
+
 # module "onprem_test_ec2" {
 #   source  = "jye-aviatrix/aws-linux-vm-public/aws"
 #   version = "1.0.3"
