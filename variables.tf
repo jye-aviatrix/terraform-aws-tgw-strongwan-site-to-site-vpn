@@ -8,7 +8,7 @@ variable "region2" {
   description = "Specify the region of the deployment"
 }
 
-variable "vpcs_region1" {
+variable "cloud_vpcs_region1" {
   default = {
     ue1shared = "10.100.1.0/24"
     ue1prod = "10.100.2.0/24"
@@ -16,7 +16,7 @@ variable "vpcs_region1" {
   }
 }
 
-variable "vpcs_region2" {
+variable "cloud_vpcs_region2" {
   default = {
     ue2shared = "10.200.1.0/24"
     ue2prod = "10.200.2.0/24"

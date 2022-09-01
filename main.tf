@@ -1,7 +1,7 @@
-module "region1_vpc" {
+module "cloud_vpc_region1" {
   source = "./modules/aws_vpc"
 
-  for_each = var.vpcs_region1
+  for_each = var.cloud_vpcs_region1
   name = each.key
   cidr = each.value
 
@@ -13,10 +13,10 @@ module "region1_vpc" {
   propagate_public_route_tables_vgw = false
 }
 
-module "region2_vpc" {
+module "cloud_vpc_region2" {
   source = "./modules/aws_vpc"
 
-  for_each = var.vpcs_region2
+  for_each = var.cloud_vpcs_region2
   name = each.key
   cidr = each.value
 
