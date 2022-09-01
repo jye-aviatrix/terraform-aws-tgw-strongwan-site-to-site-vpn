@@ -57,6 +57,6 @@ variable "onpremgw_asn_region1" {
   description = "ASN of onprem VPN gateway"
 }
 
-# variable "key_name" {
-#   description = "Provide EC2 Key Pair name for test machines launched in Public subnets"
-# }
+variable "key_name" {
+  description = "Provide EC2 Key Pair name for test machines launched in Public subnets"
+}

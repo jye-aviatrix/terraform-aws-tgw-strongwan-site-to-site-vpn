@@ -105,88 +105,80 @@ resource "aws_customer_gateway" "cxgw_region1" {
 }
 
 
-# resource "aws_vpn_connection" "region1" {
-#   customer_gateway_id = aws_customer_gateway.cxgw_region1.id
-#   transit_gateway_id  = aws_ec2_transit_gateway.tgw_region1.id
-#   type                = aws_customer_gateway.cxgw_region1.type
-# }
-
-# # Create VPN connection
-# resource "aws_vpn_connection" "main" {
-#   vpn_gateway_id      = module.cloudvpc.vgw_id
-#   customer_gateway_id = aws_customer_gateway.main.id
-#   type                = "ipsec.1"
-#   static_routes_only  = false
-#   tags = {
-#     Name = var.onprem_vpn_gw_name
-#   }
-# }
-
-
-# # Store IPSec Key in Secret Manager
-
-# locals {
-#   tunnel_1_psk_name = "${aws_vpn_connection.main.id}-tunnel-1-psk" 
-#   tunnel_2_psk_name = "${aws_vpn_connection.main.id}-tunnel-2-psk" 
-# }
-# resource "aws_secretsmanager_secret" "tunnel_1_psk" {
-#   name =  local.tunnel_1_psk_name
-# }
+resource "aws_vpn_connection" "region1" {
+  customer_gateway_id = aws_customer_gateway.cxgw_region1.id
+  transit_gateway_id  = aws_ec2_transit_gateway.tgw_region1.id
+  type                = aws_customer_gateway.cxgw_region1.type
+  tags = {
+    Name = var.onprem_gw_name_region1
+  }
+}
 
 
 
-# resource "aws_secretsmanager_secret_version" "tunnel_1_psk" {
-#   secret_id = aws_secretsmanager_secret.tunnel_1_psk.id
-#   secret_string = jsonencode({"psk":"${aws_vpn_connection.main.tunnel1_preshared_key}"})
-# }
+# Store IPSec Key in Secret Manager
 
-# resource "aws_secretsmanager_secret" "tunnel_2_psk" {
-#   name = local.tunnel_2_psk_name  
-# }
+locals {
+  region1_tunnel_1_psk_name = "${aws_vpn_connection.region1.id}-tunnel-1-psk" 
+  region1_tunnel_2_psk_name = "${aws_vpn_connection.region1.id}-tunnel-2-psk" 
+}
+resource "aws_secretsmanager_secret" "region1_tunnel_1_psk" {
+  name =  local.region1_tunnel_1_psk_name
+}
 
-# resource "aws_secretsmanager_secret_version" "tunnel_2_psk" {
-#   secret_id = aws_secretsmanager_secret.tunnel_2_psk.id
-#   secret_string = jsonencode({"psk":"${aws_vpn_connection.main.tunnel2_preshared_key}"})
-# }
+resource "aws_secretsmanager_secret_version" "region1_tunnel_1_psk" {
+  secret_id = aws_secretsmanager_secret.region1_tunnel_1_psk.id
+  secret_string = jsonencode({"psk":"${aws_vpn_connection.region1.tunnel1_preshared_key}"})
+}
 
-# # Deploy CloudFormation Stack 
-# # Parameter reference: https://github.com/aws-samples/vpn-gateway-strongswan
-# # Or review local yaml file
+resource "aws_secretsmanager_secret" "region1_tunnel_2_psk" {
+  name =  local.region1_tunnel_2_psk_name
+}
 
-# resource "aws_cloudformation_stack" "vpn_gateway" {
-#   name = "vpn-gateway"
+resource "aws_secretsmanager_secret_version" "region1_tunnel_2_psk" {
+  secret_id = aws_secretsmanager_secret.region1_tunnel_2_psk.id
+  secret_string = jsonencode({"psk":"${aws_vpn_connection.region1.tunnel2_preshared_key}"})
+}
 
-#   capabilities = ["CAPABILITY_NAMED_IAM"]
 
-#   parameters = {
-#     keyName = var.key_name
-#     myIP = data.http.ip.body
-#     pAuthType = "psk"
-#     # tunnel 1
-#     pTunnel1PskSecretName = local.tunnel_1_psk_name
-#     pTunnel1VgwOutsideIpAddress = aws_vpn_connection.main.tunnel1_address
-#     pTunnel1CgwInsideIpAddress = "${aws_vpn_connection.main.tunnel1_cgw_inside_address}/${split("/",aws_vpn_connection.main.tunnel1_inside_cidr)[1]}"
-#     pTunnel1VgwInsideIpAddress = "${aws_vpn_connection.main.tunnel1_vgw_inside_address}/${split("/",aws_vpn_connection.main.tunnel1_inside_cidr)[1]}"
-#     pTunnel1VgwBgpAsn = aws_vpn_connection.main.tunnel1_bgp_asn
-#     pTunnel1BgpNeighborIpAddress = aws_vpn_connection.main.tunnel1_vgw_inside_address
-#     # tunnel 2
-#     pTunnel2PskSecretName = local.tunnel_2_psk_name
-#     pTunnel2VgwOutsideIpAddress = aws_vpn_connection.main.tunnel2_address
-#     pTunnel2CgwInsideIpAddress = "${aws_vpn_connection.main.tunnel2_cgw_inside_address}/${split("/",aws_vpn_connection.main.tunnel2_inside_cidr)[1]}"
-#     pTunnel2VgwInsideIpAddress = "${aws_vpn_connection.main.tunnel2_vgw_inside_address}/${split("/",aws_vpn_connection.main.tunnel2_inside_cidr)[1]}"
-#     pTunnel2VgwBgpAsn = aws_vpn_connection.main.tunnel2_bgp_asn
-#     pTunnel2BgpNeighborIpAddress = aws_vpn_connection.main.tunnel2_vgw_inside_address
+# Deploy CloudFormation Stack 
+# Parameter reference: https://github.com/aws-samples/vpn-gateway-strongswan
+# Or review local yaml file
 
-#     pVpcId = module.onpremvpc.vpc_id
-#     pVpcCidr = module.onpremvpc.vpc_cidr_block
-#     pSubnetId = module.onpremvpc.public_subnets[0]
-#     pUseElasticIp = true
-#     pEipAllocationId = aws_eip.onpremvpngw.id
-#     pLocalBgpAsn = var.onprem_asn
-#   }
+resource "aws_cloudformation_stack" "region_1vpn_gateway" {
+  name = "region1-vpn-gateway"
 
-#   template_body = file("${path.module}/vpn-gateway-strongswan.yml")
-# }
+  capabilities = ["CAPABILITY_NAMED_IAM"]
+
+  parameters = {
+    keyName = var.key_name
+    myIP = data.http.ip.body
+    pAuthType = "psk"
+    # tunnel 1
+    pTunnel1PskSecretName = local.region1_tunnel_1_psk_name
+    pTunnel1VgwOutsideIpAddress = aws_vpn_connection.region1.tunnel1_address
+    pTunnel1CgwInsideIpAddress = "${aws_vpn_connection.region1.tunnel1_cgw_inside_address}/${split("/",aws_vpn_connection.region1.tunnel1_inside_cidr)[1]}"
+    pTunnel1VgwInsideIpAddress = "${aws_vpn_connection.region1.tunnel1_vgw_inside_address}/${split("/",aws_vpn_connection.region1.tunnel1_inside_cidr)[1]}"
+    pTunnel1VgwBgpAsn = aws_vpn_connection.region1.tunnel1_bgp_asn
+    pTunnel1BgpNeighborIpAddress = aws_vpn_connection.region1.tunnel1_vgw_inside_address
+    # tunnel 2
+    pTunnel2PskSecretName = local.region1_tunnel_2_psk_name
+    pTunnel2VgwOutsideIpAddress = aws_vpn_connection.region1.tunnel2_address
+    pTunnel2CgwInsideIpAddress = "${aws_vpn_connection.region1.tunnel2_cgw_inside_address}/${split("/",aws_vpn_connection.region1.tunnel2_inside_cidr)[1]}"
+    pTunnel2VgwInsideIpAddress = "${aws_vpn_connection.region1.tunnel2_vgw_inside_address}/${split("/",aws_vpn_connection.region1.tunnel2_inside_cidr)[1]}"
+    pTunnel2VgwBgpAsn = aws_vpn_connection.region1.tunnel2_bgp_asn
+    pTunnel2BgpNeighborIpAddress = aws_vpn_connection.region1.tunnel2_vgw_inside_address
+
+    pVpcId = module.onprem_vpc_region1.vpc_id
+    pVpcCidr = module.onprem_vpc_region1.vpc_cidr_block
+    pSubnetId = module.onprem_vpc_region1.public_subnets[0]
+    pUseElasticIp = true
+    pEipAllocationId = aws_eip.onpregw_region1.id
+    pLocalBgpAsn = var.onpremgw_asn_region1
+  }
+
+  template_body = file("${path.module}/vpn-gateway-strongswan.yml")
+}
 
 # # Add Test instances
 # module "cloud_test_ec2" {
