@@ -215,27 +215,20 @@ module "region1_test_ec2" {
   vpc_id = module.cloud_vpc_region1[each.key].vpc_id
 }
 
-# module "onprem_test_ec2" {
-#   source  = "jye-aviatrix/aws-linux-vm-public/aws"
-#   version = "1.0.3"
-#   key_name = var.key_name
-#   region = var.region
-#   subnet_id = module.onpremvpc.public_subnets[0]
-#   vm_name = "onprem-test-ec2"
-#   vpc_id = module.onpremvpc.vpc_id
-# }
+module "region1_onprem_test_ec2" {
+  source  = "jye-aviatrix/aws-linux-vm-public/aws"
+  version = "2.0.0"
+  key_name = var.key_name
+  subnet_id = module.onprem_vpc_region1.public_subnets[0]
+  vm_name = "region1-onprem-test-ec2"
+  vpc_id = module.onprem_vpc_region1.vpc_id
+}
 
 # # Add Cloud Routes to OnPrem route tables, point to the StrongWAN gateway
 
-# resource "aws_route" "public_vpn_gw" {
-#   count                  = length(module.onpremvpc.public_route_table_ids)
-#   route_table_id         = module.onpremvpc.public_route_table_ids[count.index]
-#   destination_cidr_block = var.cloud_vpc_cidr
-#   network_interface_id = aws_cloudformation_stack.vpn_gateway.outputs.NicID
-# }
-# resource "aws_route" "private_vpn_gw" {
-#   count                  = length(module.onpremvpc.private_route_table_ids)
-#   route_table_id         = module.onpremvpc.private_route_table_ids[count.index]
-#   destination_cidr_block = var.cloud_vpc_cidr
-#   network_interface_id = aws_cloudformation_stack.vpn_gateway.outputs.NicID
-# }
+resource "aws_route" "region1_public_vpn_gw" {
+  for_each = toset(flatten(concat(module.onprem_vpc_region1.public_route_table_ids,module.onprem_vpc_region1.private_route_table_ids)))
+  route_table_id         = each.key
+  destination_cidr_block = "10.0.0.0/8"
+  network_interface_id = aws_cloudformation_stack.region_1vpn_gateway.outputs.NicID
+}
