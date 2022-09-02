@@ -57,6 +57,16 @@ variable "onpremgw_asn_region1" {
   description = "ASN of onprem VPN gateway"
 }
 
+variable "onprem_gw_name_region2" {
+  default = "ue2onpremgw"
+  description = "OnPrem VPN gateway name"
+}
+
+variable "onpremgw_asn_region2" {
+  default = 65002
+  description = "ASN of onprem VPN gateway"
+}
+
 variable "key_name" {
   description = "Provide EC2 Key Pair name for test machines launched in Public subnets"
 }
