@@ -28,12 +28,18 @@ resource "aws_ec2_transit_gateway_route" "region1_to_region2_cloud" {
   destination_cidr_block         = "10.200.0.0/16"
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_peering_attachment.tgw_peering.id
   transit_gateway_route_table_id = aws_ec2_transit_gateway.tgw_region1.association_default_route_table_id
+  depends_on = [
+    aws_ec2_transit_gateway_peering_attachment_accepter.tgw_peering
+  ]
 }
 
 resource "aws_ec2_transit_gateway_route" "region1_to_region2_onprem" {
   destination_cidr_block         = "10.20.0.0/16"
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_peering_attachment.tgw_peering.id
   transit_gateway_route_table_id = aws_ec2_transit_gateway.tgw_region1.association_default_route_table_id
+  depends_on = [
+    aws_ec2_transit_gateway_peering_attachment_accepter.tgw_peering
+  ]
 }
 
 resource "aws_ec2_transit_gateway_route" "region2_to_region1_cloud" {
