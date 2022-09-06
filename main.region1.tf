@@ -122,7 +122,7 @@ resource "aws_cloudformation_stack" "region1_vpn_gateway" {
 
   parameters = {
     keyName = var.key_name
-    myIP = data.http.ip.body
+    myIP = data.http.ip.response_body
     pAuthType = "psk"
     # tunnel 1
     pTunnel1PskSecretName = local.region1_tunnel_1_psk_name
@@ -154,7 +154,7 @@ resource "aws_cloudformation_stack" "region1_vpn_gateway" {
 module "region1_test_ec2" {
   for_each = var.cloud_vpcs_region1
   source  = "jye-aviatrix/aws-linux-vm-public/aws"
-  version = "2.0.0"
+  version = "2.0.1"
   key_name = var.key_name
   subnet_id = module.cloud_vpc_region1[each.key].public_subnets[0]
   vm_name = each.key
@@ -163,7 +163,7 @@ module "region1_test_ec2" {
 
 module "region1_onprem_test_ec2" {
   source  = "jye-aviatrix/aws-linux-vm-public/aws"
-  version = "2.0.0"
+  version = "2.0.1"
   key_name = var.key_name
   subnet_id = module.onprem_vpc_region1.public_subnets[0]
   vm_name = "region1-onprem-test-ec2"
