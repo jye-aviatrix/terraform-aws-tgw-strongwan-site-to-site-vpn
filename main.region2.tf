@@ -46,7 +46,7 @@ resource "aws_ec2_transit_gateway" "tgw_region2" {
 # Attach region2 VPCs to region2 tgw
 resource "aws_ec2_transit_gateway_vpc_attachment" "region2" {
   for_each           = var.cloud_vpcs_region2
-  subnet_ids         = module.cloud_vpc_region2[each.key].public_subnets
+  subnet_ids         = module.cloud_vpc_region2[each.key].private_subnets
   transit_gateway_id = aws_ec2_transit_gateway.tgw_region2.id
   vpc_id             = module.cloud_vpc_region2[each.key].vpc_id
   tags = {
