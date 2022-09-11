@@ -41,11 +41,17 @@ variable "tgw_region1" {
   default = "ue1tgw"
 }
 
+variable "tgw_region1_asn" {
+  default = 65101
+}
+
 variable "tgw_region2" {
   default = "ue2tgw"  
 }
 
-
+variable "tgw_region2_asn" {
+  default = 65102
+}
 
 variable "onprem_gw_name_region1" {
   default = "ue1onpremgw"

@@ -33,6 +33,7 @@ module "onprem_vpc_region1" {
 
 resource "aws_ec2_transit_gateway" "tgw_region1" {
   description = var.tgw_region1
+  amazon_side_asn = var.tgw_region1_asn
   tags = {
     "Name" = var.tgw_region1
   }
