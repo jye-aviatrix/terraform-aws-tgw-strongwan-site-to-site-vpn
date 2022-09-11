@@ -21,7 +21,7 @@ Note, IKEv1 is been used here.
 ```terraform
 module "tgw-strongwan-site-to-site-vpn" {
   source  = "jye-aviatrix/tgw-strongwan-site-to-site-vpn/aws"
-  version = "1.0.0"
+  version = "1.0.3"
   key_name  = "ec2-key-pair"
 }
 
